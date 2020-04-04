@@ -51,12 +51,12 @@ int findFrame(){
 }
 
 int findVictim(PCB *p){
-    return findVictimHelper(p->pageTable, rand() % (RAM_SIZE % PAGE_LENGTH + 1)); 
+    return findVictimHelper(p->pageTable, (rand() % (RAM_SIZE / PAGE_LENGTH)) + 1); 
 }
 
 int findVictimHelper(int[] ptable, int _rand){
     for(int i = 0; i<ptable.length ; i++ ) 
         if(ptable[i] == _rand) return _rand; 
 
-    return findVictim(ptable, rand() % (RAM_SIZE % PAGE_LENGTH + 1)); 
+    return findVictim(ptable, (rand() % (RAM_SIZE / PAGE_LENGTH)) + 1); 
 }
