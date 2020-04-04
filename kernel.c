@@ -5,7 +5,7 @@
 #include "kernel.h"
 #include "ram.h"
 #include "cpu.h"
-#define CPU_QUANTA 2
+#include "constants.h"
 
 int myinit(char *filename); 
 int scheduler();

@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include "pcb.h"
 #include "ram.h"
-#define PAGE_LENGTH 4;
-#define RAM_SIZE 40; 
+#include "constants.h"
 
 int countTotalPages(FILE *f); 
 void loadPage(int pageNumber, FILE *f, int frameNumber); 

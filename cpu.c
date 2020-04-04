@@ -3,7 +3,7 @@
 #include <string.h>
 #include "shell.h"
 #include "ram.h"
-#define CPU_QUANTA 2 
+#include "constants.h" 
 
 struct CPU {
     int IP;
