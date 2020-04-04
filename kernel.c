@@ -15,10 +15,6 @@ void freePCB();
 PCB* head = NULL;
 PCB* tail = NULL; 
 
-void main(){
-    shellUI();	
-}
-
 int myinit(char *filename){
     FILE *p = NULL; 
     
@@ -99,4 +95,19 @@ void freePCB(){
         free(head); 
         head = next;
     }
+}
+
+int kernel(){
+    return shellUI(); 
+}
+
+void boot(){
+    //prepare backing store
+    char *_command = "rm -rf BackingStore && mkdir BackingStore";
+    system(_command);
+}
+
+int main(){
+    boot(); 
+    return kernel(); 
 }

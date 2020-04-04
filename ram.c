@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define RAM_SIZE 1000 
+#define RAM_SIZE 40 
 
 char *ram[RAM_SIZE]; 
 int k = 0; 
