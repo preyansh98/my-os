@@ -2,7 +2,7 @@
 #define KERNEL_H
 #include "pcb.h"
 
-int myinit(char *filename);
+void myinit(PCB *pcb);
 int scheduler();
 void freePCB();
 

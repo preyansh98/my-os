@@ -6,6 +6,7 @@
 #include "kernel.h"
 #include "cpu.h"
 #include "ram.h"
+#include "memorymanager.h"
 
 int interpreter(char *commands[], int numargs); 
 int help(char *commands[],int numargs); 
@@ -94,28 +95,18 @@ int run_script(char *commands[], int numargs){
 
 int exec(char *commands[], int numargs){
     if(numargs < 1 || numargs > 4) return 2; 
-    
-    //check duplicates
-    for(int ptr = 1; ptr<numargs; ptr++){
-        char *prog = commands[ptr]; 
-        for(int ptr1 = ptr+1; ptr1 < numargs; ptr1++){
-            if(strcmp(prog, commands[ptr1]) == 0) {
-                printf("Error: Script %s already loaded \n", prog);
-                return 1; 
-            }
-        }
-    }
        
     initCPU(); 
+    FILE *fp = NULL; 
     int _loaderr = 0;
 
     for(int ptr = 1; ptr<numargs; ptr++){ 
-        if(myinit(commands[ptr]) != 0){
-            _loaderr = -1;
-            break;   
-        }
+        fp = fopen(commands[ptr], "rt");
+        _loaderr = launcher(fp); 
+        
+        if(_loaderr!=0) break;  
     }
-    
+
     if(_loaderr == 0)
         scheduler(); 
     

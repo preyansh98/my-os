@@ -2,13 +2,12 @@
 #include <stdlib.h>
 #include "pcb.h"
 
-PCB* makePCB(int start, int end); 
-
-PCB* makePCB(int start, int end){
+PCB* makePCB(int pageNo, int pageOff, int totalPages){
     PCB *pcb = malloc (sizeof (PCB));
-    pcb->start = start; 
-    pcb->end = end;
+    pcb->PC_page = pageNo; 
+    pcb->PC_offset = pageOff; 
+    pcb->pages_max = totalPages;
     pcb->next = NULL; 
-    
+
     return pcb;  
 }
