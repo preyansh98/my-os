@@ -4,10 +4,11 @@
 
 typedef struct PCB{
     int PC;
+    int pid;
     int PC_page; 
     int PC_offset; 
     int pages_max; 
-    int pageTable[RAM_SIZE / PAGE_LENGTH]; 
+    int pageTable[NUM_PAGES]; 
 
     //tmp
     int start;

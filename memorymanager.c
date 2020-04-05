@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "pcb.h"
 #include "ram.h"
+#include "kernel.h"
 #include "constants.h"
 
 int countTotalPages(FILE *f); 
@@ -19,8 +20,7 @@ int countTotalPages(FILE *f){
         _lines++; 
 
     int numPages = _lines / PAGE_LENGTH + _lines % PAGE_LENGTH; 
-    fclose(f); 
-
+    rewind(f); 
     return numPages;  
 }
 
@@ -35,6 +35,8 @@ void loadPage(int pageNumber, FILE *f, int frameNumber){
             setRAMCell(_pos++, line);       
         }
     }
+
+    rewind(f); 
 }
 
 int findFrame(){
@@ -60,6 +62,62 @@ int findVictim(PCB *p){
     return findVictimHelper(p->pageTable, (rand() % (RAM_SIZE / PAGE_LENGTH)) + 1); 
 }
 
-int launcher(FILE *fp){
+int _pid = 0; 
 
+void updateVictimFramePCB(int victimFrame){
+    //TODO!
+}
+
+int updatePageTable(PCB *pcb, int pageNumber, int frameNumber, int victimFrame){
+    if(victimFrame == -1){
+        pcb->pageTable[pageNumber] = frameNumber;
+        return 0;
+    }
+    
+    //victim present
+    pcb->pageTable[pageNumber] = victimFrame; 
+    updateVictimFramePCB(victimFrame);
+    return 0;  
+}
+
+void findFrameAndLoadPage(PCB *pcb, FILE *f, int _p){
+    int _f = findFrame(); 
+    
+    if(_f == -1){
+        int _v = findVictim(pcb); 
+        loadPage(_p, f, _v); 
+        updatePageTable(pcb, _p, _f, _v);    
+    } else {
+        loadPage(_p, f, _f); 
+        updatePageTable(pcb, _p, _f, -1); 
+    }
+}
+
+int launcher(FILE *p){
+    if(p == NULL)
+        return 1; 
+
+    char filename[100];
+    snprintf(filename, 99, "BackingStore/%d.txt", ++_pid);  
+    FILE *fp = fopen(filename, "wt"); 
+
+    char line[1000];
+    while(fgets(line, 999, p))
+        fputs(line, fp); 
+
+    fclose(p); 
+    fclose(fp); 
+
+    fp = fopen(filename, "rt"); 
+    int totalPages = countTotalPages(fp); 
+    PCB *pcb = makePCB(0,0,totalPages);
+    pcb->pid = _pid; 
+
+    findFrameAndLoadPage(pcb, fp, 1); 
+    
+    if(totalPages >= 2)
+        findFrameAndLoadPage(pcb, fp, 2); 
+
+    myinit(pcb); 
+    return 0; 
 }
