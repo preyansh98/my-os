@@ -28,7 +28,7 @@ void loadPage(int pageNumber, FILE *f, int frameNumber){
     fseek(f, pageNumber, PAGE_LENGTH, SEEK_SET); 
     char line[1000]; 
 
-    int _pos = findFrameInRAM(frameNumber); 
+    int _pos = findFrameIdxInRAM(frameNumber); 
 
     for(int i = 0; i<PAGE_LENGTH; i++){
         while(fgets(f, line, 999)){

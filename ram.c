@@ -1,13 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define RAM_SIZE 40 
+#include "constants.h"
 
 char *ram[RAM_SIZE]; 
 int k = 0; 
 
-void addToRAM(FILE *p, int *start, int *end); 
-void clearRAM(); 
+int findFrameIdxInRAM(int frameNo){
+    return (frameNo - 1) * PAGE_LENGTH;
+}
+
+int isFrameAvailable(int frameNo){
+    int _f = findFrameIdxInRAM(frameNo); 
+    return (_f < RAM_SIZE && ram[_f] != NULL); 
+}
+
+void setRAMCell(int cell, char *line){
+    ram[cell] = strdup(line);     
+}
 
 void addToRAM(FILE *p, int *start, int *end){ 
     char line[1000]; 
