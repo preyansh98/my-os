@@ -28,7 +28,7 @@ void loadPage(int pageNumber, FILE *f, int frameNumber){
     fseek(f, pageNumber*PAGE_LENGTH, SEEK_SET); 
     char line[1000]; 
 
-    int _pos = findFrameIdxInRAM(frameNumber); 
+    int _pos = findFrameIdxInRAM(frameNumber);  
 
     for(int i = 0; i<PAGE_LENGTH; i++){
         while(fgets(line, 999,f)){
@@ -44,7 +44,7 @@ int findFrame(){
 
     while ( _i < RAM_SIZE ) {
         if(isFrameAvailable(_i))
-            return _i; 
+            return _i/4 + 1; 
         _i+=4; 
     }
 
@@ -53,9 +53,10 @@ int findFrame(){
 
 int findVictimHelper(int ptable[], int _rand){
     for(int i = 0; i < NUM_PAGES ; i++ ) 
-        if(ptable[i] == _rand) return _rand; 
-
-    return findVictimHelper(ptable, (rand() % (RAM_SIZE / PAGE_LENGTH)) + 1); 
+        if(ptable[i] == _rand) 
+            return findVictimHelper(ptable, (rand() % (RAM_SIZE / PAGE_LENGTH)) + 1);
+    
+    return _rand;  
 }
 
 int findVictim(PCB *p){
@@ -65,18 +66,32 @@ int findVictim(PCB *p){
 int _pid = 0; 
 
 void updateVictimFramePCB(int victimFrame){
-    //TODO!
+    PCB *rq = peekHead(); 
+    if(rq == NULL) return; 
+    
+    int _vf = 0; 
+
+    for( ; rq!=NULL && _vf == 0; rq=rq->next){
+        for(int i = 0; i<NUM_PAGES; i++){
+            if(rq->pageTable[i] == victimFrame) {
+                rq->pageTable[i] = 0; 
+                _vf = 1; 
+                break;
+            }
+        }
+    }
 }
 
 int updatePageTable(PCB *pcb, int pageNumber, int frameNumber, int victimFrame){
     if(victimFrame == -1){
-        pcb->pageTable[pageNumber] = frameNumber;
+        pcb->pageTable[pageNumber] = frameNumber; 
         return 0;
     }
     
     //victim present
     pcb->pageTable[pageNumber] = victimFrame; 
     updateVictimFramePCB(victimFrame);
+    
     return 0;  
 }
 
@@ -118,6 +133,6 @@ int launcher(FILE *p){
     if(totalPages >= 2)
         findFrameAndLoadPage(pcb, fp, 2); 
 
-    myinit(pcb); 
+    addToReady(pcb); 
     return 0; 
 }

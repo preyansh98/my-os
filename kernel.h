@@ -2,7 +2,8 @@
 #define KERNEL_H
 #include "pcb.h"
 
-void myinit(PCB *pcb);
+PCB* peekHead();
+void addToReady(PCB *pcb);
 int scheduler();
 void freePCB();
 

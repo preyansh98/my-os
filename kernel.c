@@ -19,6 +19,10 @@ void myinit(PCB *pcb){
     addToReady(pcb);   
 }
 
+PCB* peekHead(){
+    return head; 
+}
+
 int scheduler(){
       
     while(head != NULL) {
