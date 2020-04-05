@@ -8,11 +8,11 @@ typedef struct PCB{
     int PC_offset; 
     int pages_max; 
     int pageTable[RAM_SIZE / PAGE_LENGTH]; 
-    
+
     //tmp
     int start;
     int end;
-
+  
     struct PCB* next; 
 }PCB; 
 
