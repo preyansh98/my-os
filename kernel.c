@@ -5,11 +5,14 @@
 #include "kernel.h"
 #include "ram.h"
 #include "cpu.h"
+#include "memorymanager.h"
 #include "constants.h"
 
+int pageFaultInterrupt(PCB *pcb);
 void myinit(PCB *pcb); 
 int scheduler();
 void addToReady(PCB* pcb);  
+void moveRqHeadToEnd(); 
 void freePCB(); 
 
 PCB* head = NULL;
@@ -28,9 +31,14 @@ int scheduler(){
     while(head != NULL) {
         while(isCPUAvailable() == -1) ; 
 
-        int _ip = head->PC + head->start;
+        int _ip = head->PC + head->PC_offset++;
         setCPU_IP(_ip);
         
+        //page fault interrupt
+        if(head->PC_offset == 4)
+            if(pageFaultInterrupt(head) == -1)
+                return -1;
+
         if(_ip == head->end)
             run(CPU_QUANTA-1);
         else
@@ -44,12 +52,7 @@ int scheduler(){
 
             if(head->next == NULL) continue; 
 
-            PCB* newHead = head->next; 
-            head->next = NULL; 
-            tail->next = head;
-            tail = tail->next;
-            tail->next = NULL; 
-            head = newHead;  
+            moveRqHeadToEnd();  
         } else {
             //done. 
             PCB* newHead = head->next;
@@ -59,6 +62,34 @@ int scheduler(){
     }
     return 0; 
 }
+
+int pageFaultInterrupt(PCB* pcb){
+    ++pcb->PC_page;
+    
+    if(pcb->PC_page > pcb->pages_max) return -1; 
+    
+    if(pcb->pageTable[pcb->PC_page] == 0) {
+        char filename[100]; 
+        snprintf(filename, 99, "BackingStore/swap-%d.txt", pcb->pid);
+        FILE *fp = fopen(filename, "rt"); 
+        findFrameAndLoadPage(pcb, fp, pcb->PC_page);
+    }
+    
+    pcb->PC = findFrameIdxInRAM(pcb->pageTable[pcb->PC_page]);    
+    pcb->PC_offset = 0; 
+
+    moveRqHeadToEnd(); 
+    return 0;
+}
+
+void moveRqHeadToEnd(){
+     PCB* newHead = head->next; 
+     head->next = NULL; 
+     tail->next = head;
+     tail = tail->next;
+     tail->next = NULL; 
+     head = newHead;  
+ }
 
 void addToReady(PCB* pcb){
     if(pcb == NULL) return; 
