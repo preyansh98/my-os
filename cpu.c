@@ -29,7 +29,8 @@ int run(int quanta){
          
         if(isNextInstructionValid == -1){
             initCPU(); 
-            break;
+            _cpuAvail = 1; 
+            return -1; 
         } 
 
         strcpy(cpu.IR, nextInstruction); 

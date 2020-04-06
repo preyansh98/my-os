@@ -73,6 +73,7 @@ int pageFaultInterrupt(PCB* pcb){
         snprintf(filename, 99, "BackingStore/swap-%d.txt", pcb->pid);
         FILE *fp = fopen(filename, "rt"); 
         findFrameAndLoadPage(pcb, fp, pcb->PC_page);
+        fclose(fp); 
     }
     
     pcb->PC = findFrameIdxInRAM(pcb->pageTable[pcb->PC_page]);    
