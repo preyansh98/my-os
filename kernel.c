@@ -12,7 +12,8 @@ int pageFaultInterrupt(PCB *pcb);
 int myinit(PCB *pcb); 
 int scheduler(); 
 void addToReady(PCB *pcb); 
-void moveRqHeadToEnd(); 
+void moveRqHeadToEnd();
+void removeSwapFile(int _pid);  
 void freePCB(); 
 
 PCB* head = NULL;
@@ -26,6 +27,12 @@ int myinit(PCB *pcb){
     return 0; 
 }
 
+void removeSwapFile(int _pid){
+    char command[100]; 
+    snprintf(command, 99, "rm -rf BackingStore/swap-%d.txt", _pid);
+    system(command);     
+}
+
 PCB* peekHead(){
     return head; 
 }
@@ -34,8 +41,8 @@ int scheduler(){
       
     while(head != NULL) {
         while(isCPUAvailable() == -1) ; 
-
-        int _ip = head->PC + head->PC_offset++;
+ 
+        int _ip = head->PC + head->PC_offset;
         setCPU_IP(_ip);
         
         //page fault interrupt
@@ -44,22 +51,25 @@ int scheduler(){
                 return -1;
 
         int _err = 0; 
-        if(head->PC_offset == PAGE_LENGTH - 1)
+        if(head->PC_offset == PAGE_LENGTH - 1) {
             _err = run(CPU_QUANTA-1);
-        else {
             ++head->PC_offset;
-            _err = run(CPU_QUANTA);
         }
-
+        else {
+            _err = run(CPU_QUANTA);
+            head->PC_offset+=2; 
+        }
+ 
         if(_err == -1) 
             if(pageFaultInterrupt(head) == -1)
                 return -1; 
-
+ 
         if(head->PC_offset < PAGE_LENGTH) {
             if(head->next == NULL) continue; 
             moveRqHeadToEnd();  
         } else {
-            //done. 
+            //done.  
+            removeSwapFile(head->pid); 
             PCB* newHead = head->next;
             free(head); 
             head = newHead;  
@@ -71,9 +81,12 @@ int scheduler(){
 int pageFaultInterrupt(PCB* pcb){
     ++pcb->PC_page;
     
-    if(pcb->PC_page > pcb->pages_max) return -1; 
-    
-    if(pcb->pageTable[pcb->PC_page] == 0) {
+    if(pcb->PC_page >= pcb->pages_max) {
+        removeSwapFile(pcb->pid); 
+        return -1; 
+    }
+
+    if(pcb->pageTable[pcb->PC_page] == -1) {
         char filename[100]; 
         snprintf(filename, 99, "BackingStore/swap-%d.txt", pcb->pid);
         FILE *fp = fopen(filename, "rt"); 

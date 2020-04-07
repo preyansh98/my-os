@@ -109,7 +109,7 @@ int exec(char *commands[], int numargs){
 
     if(_loaderr == 0)
         scheduler(); 
-    
+  
     clearRAM();
     freePCB(); 
 

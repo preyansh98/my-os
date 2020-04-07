@@ -40,12 +40,10 @@ void loadPage(int pageNumber, FILE *f, int frameNumber){
 }
 
 int findFrame(){
-    int _i = 0; 
-
-    while ( _i < RAM_SIZE ) {
+    //NUM_PAGES == NUM_FRAMES
+    for (int _i = 0; _i<NUM_PAGES; ++_i){
         if(isFrameAvailable(_i))
-            return _i/4 + 1; 
-        _i+=4; 
+            return _i; 
     }
 
     return -1; 
@@ -74,7 +72,7 @@ void updateVictimFramePCB(int victimFrame){
     for( ; rq!=NULL && _vf == 0; rq=rq->next){
         for(int i = 0; i<NUM_PAGES; i++){
             if(rq->pageTable[i] == victimFrame) {
-                rq->pageTable[i] = 0; 
+                rq->pageTable[i] = -1; 
                 _vf = 1; 
                 break;
             }
@@ -125,6 +123,7 @@ int launcher(FILE *p){
 
     fp = fopen(filename, "rt"); 
     int totalPages = countTotalPages(fp); 
+    
     PCB *pcb = makePCB(0,0,totalPages);
     pcb->pid = _pid; 
 
