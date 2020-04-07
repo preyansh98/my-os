@@ -7,12 +7,12 @@ char *ram[RAM_SIZE];
 int k = 0; 
 
 int findFrameIdxInRAM(int frameNo){
-    return (frameNo - 1) * PAGE_LENGTH;
+    return (frameNo) * PAGE_LENGTH;
 }
 
 int isFrameAvailable(int frameNo){
     int _f = findFrameIdxInRAM(frameNo); 
-    return (_f < RAM_SIZE && ram[_f] != NULL); 
+    return (_f < RAM_SIZE && ram[_f] == NULL); 
 }
 
 void setRAMCell(int cell, char *line){

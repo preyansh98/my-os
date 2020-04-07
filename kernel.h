@@ -3,7 +3,7 @@
 #include "pcb.h"
 
 PCB* peekHead();
-void addToReady(PCB *pcb);
+int myinit(PCB* pcb); 
 int scheduler();
 void freePCB();
 
