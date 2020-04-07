@@ -128,11 +128,11 @@ int launcher(FILE *p){
     PCB *pcb = makePCB(0,0,totalPages);
     pcb->pid = _pid; 
 
-    findFrameAndLoadPage(pcb, fp, 1); 
+    findFrameAndLoadPage(pcb, fp, 0); 
     
     if(totalPages >= 2)
-        findFrameAndLoadPage(pcb, fp, 2); 
+        findFrameAndLoadPage(pcb, fp,1); 
 
-    addToReady(pcb); 
+    myinit(pcb);
     return 0; 
 }

@@ -9,17 +9,21 @@
 #include "constants.h"
 
 int pageFaultInterrupt(PCB *pcb);
-void myinit(PCB *pcb); 
-int scheduler();
-void addToReady(PCB* pcb);  
+int myinit(PCB *pcb); 
+int scheduler(); 
+void addToReady(PCB *pcb); 
 void moveRqHeadToEnd(); 
 void freePCB(); 
 
 PCB* head = NULL;
 PCB* tail = NULL; 
 
-void myinit(PCB *pcb){
+int myinit(PCB *pcb){ 
+    int _f = pcb->pageTable[0]; 
+    pcb->PC = findFrameIdxInRAM(_f);
     addToReady(pcb);   
+
+    return 0; 
 }
 
 PCB* peekHead(){
@@ -35,23 +39,24 @@ int scheduler(){
         setCPU_IP(_ip);
         
         //page fault interrupt
-        if(head->PC_offset == 4)
+        if(head->PC_offset == PAGE_LENGTH)
             if(pageFaultInterrupt(head) == -1)
                 return -1;
 
-        if(_ip == head->end)
-            run(CPU_QUANTA-1);
-        else
-            run(CPU_QUANTA);
-        
-        int _cpuIP = getCPU_IP(); 
+        int _err = 0; 
+        if(head->PC_offset == PAGE_LENGTH - 1)
+            _err = run(CPU_QUANTA-1);
+        else {
+            ++head->PC_offset;
+            _err = run(CPU_QUANTA);
+        }
 
-        if(_cpuIP <= head->end) {
-            int pcBefore = head->PC;
-            head->PC = _cpuIP - head->start; 
+        if(_err == -1) 
+            if(pageFaultInterrupt(head) == -1)
+                return -1; 
 
+        if(head->PC_offset < PAGE_LENGTH) {
             if(head->next == NULL) continue; 
-
             moveRqHeadToEnd();  
         } else {
             //done. 
