@@ -45,11 +45,6 @@ int scheduler(){
         int _ip = head->PC + head->PC_offset;
         setCPU_IP(_ip);
         
-        //page fault interrupt
-        if(head->PC_offset == PAGE_LENGTH)
-            if(pageFaultInterrupt(head) == -1)
-                return -1;
-
         int _err = 0; 
         if(head->PC_offset == PAGE_LENGTH - 1) {
             _err = run(CPU_QUANTA-1);
@@ -60,16 +55,14 @@ int scheduler(){
             head->PC_offset+=2; 
         }
  
-        if(_err == -1) 
-            if(pageFaultInterrupt(head) == -1)
-                return -1; 
+        if(_err == -1 || head->PC_offset == PAGE_LENGTH) 
+            pageFaultInterrupt(head); 
  
         if(head->PC_offset < PAGE_LENGTH) {
             if(head->next == NULL) continue; 
             moveRqHeadToEnd();  
         } else {
-            //done.  
-            removeSwapFile(head->pid); 
+            //done.   
             PCB* newHead = head->next;
             free(head); 
             head = newHead;  
@@ -80,7 +73,7 @@ int scheduler(){
 
 int pageFaultInterrupt(PCB* pcb){
     ++pcb->PC_page;
-    
+
     if(pcb->PC_page >= pcb->pages_max) {
         removeSwapFile(pcb->pid); 
         return -1; 
@@ -93,22 +86,21 @@ int pageFaultInterrupt(PCB* pcb){
         findFrameAndLoadPage(pcb, fp, pcb->PC_page);
         fclose(fp); 
     }
-    
+        
     pcb->PC = findFrameIdxInRAM(pcb->pageTable[pcb->PC_page]);    
     pcb->PC_offset = 0; 
-
-    moveRqHeadToEnd(); 
+    
     return 0;
 }
 
-void moveRqHeadToEnd(){
+void moveRqHeadToEnd(){     
      PCB* newHead = head->next; 
      head->next = NULL; 
      tail->next = head;
      tail = tail->next;
      tail->next = NULL; 
      head = newHead;  
- }
+}
 
 void addToReady(PCB* pcb){
     if(pcb == NULL) return; 

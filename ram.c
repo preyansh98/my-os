@@ -10,7 +10,7 @@ int findFrameIdxInRAM(int frameNo){
     return (frameNo) * PAGE_LENGTH;
 }
 
-int isFrameAvailable(int frameNo){
+int isFrameAvailable(int frameNo){ 
     int _f = findFrameIdxInRAM(frameNo); 
     return (_f < RAM_SIZE && ram[_f] == NULL); 
 }
