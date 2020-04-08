@@ -19,24 +19,29 @@ int countTotalPages(FILE *f){
     while(fgets(buf,999,f))
         _lines++; 
 
-    int numPages = _lines / PAGE_LENGTH + _lines % PAGE_LENGTH; 
+    int numPages = _lines / PAGE_LENGTH; 
+    if(_lines % PAGE_LENGTH != 0) 
+        ++numPages;
+          
     rewind(f); 
     return numPages;  
 }
 
 void loadPage(int pageNumber, FILE *f, int frameNumber){
-    fseek(f, pageNumber*PAGE_LENGTH, SEEK_SET); 
+    int start = pageNumber * PAGE_LENGTH, end = start+PAGE_LENGTH; 
+    
     char line[1000]; 
-
-    int _pos = findFrameIdxInRAM(frameNumber);  
-
-    for(int i = 0; i<PAGE_LENGTH; i++){
-        while(fgets(line, 999,f)){
-            setRAMCell(_pos++, line);       
-        }
+    int _pos = findFrameIdxInRAM(frameNumber);   
+    int _counter = 0; 
+    
+    while(fgets(line, 999, f)){
+        if(_counter == end) break;
+        if(_counter++ >= start){
+            setRAMCell(_pos++, line); 
+        } 
     }
 
-    rewind(f); 
+    rewind(f);
 }
 
 int findFrame(){
@@ -95,7 +100,7 @@ int updatePageTable(PCB *pcb, int pageNumber, int frameNumber, int victimFrame){
 
 void findFrameAndLoadPage(PCB *pcb, FILE *f, int _p){
     int _f = findFrame(); 
-    
+     
     if(_f == -1){
         int _v = findVictim(pcb); 
         loadPage(_p, f, _v); 
@@ -123,7 +128,7 @@ int launcher(FILE *p){
 
     fp = fopen(filename, "rt"); 
     int totalPages = countTotalPages(fp); 
-    
+       
     PCB *pcb = makePCB(0,0,totalPages);
     pcb->pid = _pid; 
 
