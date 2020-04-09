@@ -1,0 +1,7 @@
+help
+print y
+set x 10
+print x
+set z 949
+print z
+print z 

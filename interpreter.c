@@ -39,7 +39,7 @@ int help(char *commands[], int numargs){
 	printf("set VAR STRING : Assigns a value to the shell memory \n"); 
 	printf("print VAR : Displays the STRING assigned to VAR \n"); 
 	printf("run SCRIPT.TXT : Executes the file SCRIPT.TXT \n"); 	
-	
+        printf("exec p1 p2 p3: Executes concurrent programs. \n");	
 	return 0;
 }
 int quit(char *commands[], int numargs){
@@ -109,7 +109,10 @@ int exec(char *commands[], int numargs){
 
     if(_loaderr == 0)
         scheduler(); 
-  
+    else 
+        printf("One of the scripts provided is invalid. \n Please check again. \n");
+
+    system("rm -rf BackingStore/*");  
     clearRAM();
     freePCB(); 
 

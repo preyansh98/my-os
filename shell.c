@@ -13,7 +13,7 @@ int shellUI(){
 	int errorCode = 0; 
 
 	printf("Welcome to the Preyansh Kaushik shell! \n");
-	printf("Shell version 2.0 Updated February 2020 \n"); 
+	printf("Shell version 3.0 Updated April 2020 \n"); 
 
 	while(1){
 		printf("%s", prompt); 
