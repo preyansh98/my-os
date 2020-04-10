@@ -137,6 +137,7 @@ int launcher(FILE *p){
     if(totalPages >= 2)
         findFrameAndLoadPage(pcb, fp,1); 
 
+    fclose(fp);
     myinit(pcb);
     return 0; 
 }
